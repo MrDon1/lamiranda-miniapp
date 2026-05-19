@@ -315,17 +315,34 @@ async function placeOrder() {
     const order = await res.json();
 
     if (order.id) {
-      const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const earned = Math.floor(total * 0.01);
-      user.coins = (user.coins || 0) + earned;
-      localStorage.setItem('lm_user', JSON.stringify(user));
-      cart = [];
-      updateCartCount();
-      alert(`✅ Buyurtma qabul qilindi!\n🪙 +${earned.toLocaleString()} tanga yig'ildi!`);
-      showPage('home');
-    } else {
-      alert('Xato yuz berdi, qayta urining');
-    }
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const earned = Math.floor(total * 0.01);
+  user.coins = (user.coins || 0) + earned;
+  localStorage.setItem('lm_user', JSON.stringify(user));
+
+  // Telegram'ga ma'lumot yuborish
+  const orderData = {
+    order_id: order.id,
+    name: name,
+    phone: phone,
+    address: address,
+    total: total,
+    items: cart.map(i => ({
+      name: i.name,
+      qty: i.qty,
+      price: i.price * i.qty
+    }))
+  };
+
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.sendData(JSON.stringify(orderData));
+  }
+
+  cart = [];
+  updateCartCount();
+  alert(`✅ Buyurtma qabul qilindi!\n🪙 +${earned.toLocaleString()} tanga yig'ildi!`);
+  showPage('home');
+}
   } catch (e) {
     alert('Internet xatosi, qayta urining');
   }
