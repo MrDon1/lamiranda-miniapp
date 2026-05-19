@@ -28,7 +28,7 @@ function register() {
   const address = document.getElementById('reg-address').value.trim();
 
   if (!name || !surname || !phone || !address) {
-    tg.showAlert('Barcha maydonlarni to\'ldiring!');
+    alert('Barcha maydonlarni to\'ldiring!');
     return;
   }
 
@@ -150,7 +150,7 @@ function addToCart(id, name, price, img) {
     cart.push({ id, name, price: Number(price), img, qty: 1 });
   }
   updateCartCount();
-  tg.showAlert(`${name} savatga qo'shildi!`);
+  alert(`${name} savatga qo'shildi!`);
 }
 
 // Savat sonini yangilash
@@ -217,12 +217,12 @@ function updateTotal() {
 // Tangadan foydalanish
 function useCoins() {
   if (!user?.coins || user.coins === 0) {
-    tg.showAlert('Tangangiz yo\'q!');
+    alert('Tangangiz yo\'q!');
     return;
   }
   coinsUsed = !coinsUsed;
   updateTotal();
-  tg.showAlert(coinsUsed
+  alert(coinsUsed
     ? `${user.coins.toLocaleString()} tanga qo'shildi!`
     : 'Tangalar olib tashlandi');
 }
@@ -260,7 +260,7 @@ window.onload = function() {
 
 function showCheckout() {
   if (!cart.length) {
-    tg.showAlert('Savat bo\'sh!');
+    alert('Savat bo\'sh!');
     return;
   }
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -278,7 +278,7 @@ async function placeOrder() {
   const comment = document.getElementById('co-comment').value.trim();
 
   if (!name || !phone || !address) {
-    tg.showAlert('Barcha maydonlarni to\'ldiring!');
+    alert('Barcha maydonlarni to\'ldiring!');
     return;
   }
 
@@ -321,12 +321,12 @@ async function placeOrder() {
       localStorage.setItem('lm_user', JSON.stringify(user));
       cart = [];
       updateCartCount();
-      tg.showAlert(`✅ Buyurtma qabul qilindi!\n🪙 +${earned.toLocaleString()} tanga yig'ildi!`);
+      alert(`✅ Buyurtma qabul qilindi!\n🪙 +${earned.toLocaleString()} tanga yig'ildi!`);
       showPage('home');
     } else {
-      tg.showAlert('Xato yuz berdi, qayta urining');
+      alert('Xato yuz berdi, qayta urining');
     }
   } catch (e) {
-    tg.showAlert('Internet xatosi, qayta urining');
+    alert('Internet xatosi, qayta urining');
   }
 }
