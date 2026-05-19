@@ -81,7 +81,7 @@
         <span>Jami:</span>
         <span id="cart-total">0 so'm</span>
       </div>
-      <button class="btn-primary" onclick="showPage('checkout')">Buyurtma berish →</button>
+     <button class="btn-primary" onclick="showCheckout()">Buyurtma berish →</button>
     </div>
     <div class="bottom-nav">
       <button onclick="showPage('home')" class="nav-btn">🏠<span>Bosh</span></button>
@@ -119,5 +119,37 @@
   </div>
 
   <script src="app.js"></script>
+  <!-- Buyurtma sahifasi -->
+  <div id="page-checkout" class="page" style="display:none">
+    <div class="header">
+      <button class="back-btn" onclick="showPage('cart')">← Orqaga</button>
+      <span class="logo-text">Buyurtma</span>
+    </div>
+    <div class="register-wrap">
+      <div class="inp-group">
+        <label>Ism Familiya</label>
+        <input type="text" id="co-name" placeholder="To'liq ismingiz">
+      </div>
+      <div class="inp-group">
+        <label>Telefon raqam</label>
+        <input type="tel" id="co-phone" placeholder="+998 90 123 45 67">
+      </div>
+      <div class="inp-group">
+        <label>Yetkazib berish manzili</label>
+        <input type="text" id="co-address" placeholder="Shahar, ko'cha, uy raqami">
+      </div>
+      <div class="inp-group">
+        <label>Izoh (ixtiyoriy)</label>
+        <input type="text" id="co-comment" placeholder="Qo'shimcha izoh">
+      </div>
+      <div class="total-row" style="margin-top:8px">
+        <span>Jami:</span>
+        <span id="co-total">0 so'm</span>
+      </div>
+      <button class="btn-primary" onclick="placeOrder()">
+        Buyurtmani tasdiqlash →
+      </button>
+    </div>
+  </div>
 </body>
 </html>
