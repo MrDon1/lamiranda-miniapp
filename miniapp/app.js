@@ -1,0 +1,259 @@
+// Telegram Web App
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+// API sozlamalari
+const API_URL = "https://lamiranda.uz/wp-json/wc/v3";
+const USERNAME = "lamiranda_admin";
+const APP_PASSWORD = "QvII 4pmm xl8s puLi JknE amyC";
+
+// Holat
+let cart = [];
+let user = null;
+let allProducts = [];
+let coinsUsed = false;
+
+// Sahifalar
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + page).style.display = 'flex';
+}
+
+// Ro'yxatdan o'tish
+function register() {
+  const name = document.getElementById('reg-name').value.trim();
+  const surname = document.getElementById('reg-surname').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const address = document.getElementById('reg-address').value.trim();
+
+  if (!name || !surname || !phone || !address) {
+    tg.showAlert('Barcha maydonlarni to\'ldiring!');
+    return;
+  }
+
+  user = {
+    name,
+    surname,
+    phone,
+    address,
+    coins: 0,
+    telegram_id: tg.initDataUnsafe?.user?.id || 0
+  };
+
+  localStorage.setItem('lm_user', JSON.stringify(user));
+  initHome();
+  showPage('home');
+}
+
+// Bosh sahifani yuklash
+async function initHome() {
+  updateCabinetUI();
+  loadCategories();
+  loadProducts();
+}
+
+// Kategoriyalarni yuklash
+async function loadCategories() {
+  try {
+    const res = await fetch(`${API_URL}/products/categories?per_page=20`, {
+      headers: {
+        'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
+      }
+    });
+    const cats = await res.json();
+    const container = document.getElementById('categories');
+    container.innerHTML = '';
+
+    // "Hammasi" tugmasi
+    const allBtn = document.createElement('button');
+    allBtn.className = 'category-btn active';
+    allBtn.textContent = 'Hammasi';
+    allBtn.onclick = () => {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active');
+      renderProducts(allProducts);
+    };
+    container.appendChild(allBtn);
+
+    cats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'category-btn';
+      btn.textContent = cat.name;
+      btn.onclick = () => {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered = allProducts.filter(p =>
+          p.categories.some(c => c.id === cat.id)
+        );
+        renderProducts(filtered);
+      };
+      container.appendChild(btn);
+    });
+  } catch (e) {
+    console.log('Kategoriya xato:', e);
+  }
+}
+
+// Mahsulotlarni yuklash
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API_URL}/products?per_page=50&status=publish`, {
+      headers: {
+        'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
+      }
+    });
+    allProducts = await res.json();
+    renderProducts(allProducts);
+  } catch (e) {
+    document.getElementById('products').innerHTML = '<p class="empty-text">Mahsulotlar yuklanmadi</p>';
+  }
+}
+
+// Mahsulotlarni ko'rsatish
+function renderProducts(products) {
+  const container = document.getElementById('products');
+  if (!products.length) {
+    container.innerHTML = '<p class="empty-text">Mahsulotlar yo\'q</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  products.forEach(p => {
+    const inStock = p.stock_status === 'instock';
+    const img = p.images[0]?.src || '';
+    const div = document.createElement('div');
+    div.className = 'product-card';
+    div.innerHTML = `
+      <div class="product-img">
+        ${img ? `<img src="${img}" alt="${p.name}">` : '🎂'}
+      </div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">${Number(p.price).toLocaleString()} so'm</div>
+        <button class="product-btn" ${!inStock ? 'disabled style="opacity:0.5"' : ''}
+          onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${img}')">
+          ${inStock ? 'Savatga +' : 'Tugagan'}
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Savatga qo'shish
+function addToCart(id, name, price, img) {
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ id, name, price: Number(price), img, qty: 1 });
+  }
+  updateCartCount();
+  tg.showAlert(`${name} savatga qo'shildi!`);
+}
+
+// Savat sonini yangilash
+function updateCartCount() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cart-count').textContent = count;
+}
+
+// Savatni ko'rsatish
+function renderCart() {
+  const container = document.getElementById('cart-items');
+  if (!cart.length) {
+    container.innerHTML = '<p class="empty-text">Savat bo\'sh</p>';
+    document.getElementById('cart-total').textContent = '0 so\'m';
+    return;
+  }
+
+  container.innerHTML = '';
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = `
+      <div class="cart-item-img">
+        ${item.img ? `<img src="${item.img}">` : '🎂'}
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">${(item.price * item.qty).toLocaleString()} so'm</div>
+      </div>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  updateTotal();
+  document.getElementById('coins-balance').textContent =
+    (user?.coins || 0).toLocaleString();
+}
+
+// Miqdorni o'zgartirish
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+  updateCartCount();
+  renderCart();
+}
+
+// Jami summani yangilash
+function updateTotal() {
+  let total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  if (coinsUsed && user?.coins) {
+    total = Math.max(0, total - user.coins);
+  }
+  document.getElementById('cart-total').textContent =
+    total.toLocaleString() + ' so\'m';
+}
+
+// Tangadan foydalanish
+function useCoins() {
+  if (!user?.coins || user.coins === 0) {
+    tg.showAlert('Tangangiz yo\'q!');
+    return;
+  }
+  coinsUsed = !coinsUsed;
+  updateTotal();
+  tg.showAlert(coinsUsed
+    ? `${user.coins.toLocaleString()} tanga qo'shildi!`
+    : 'Tangalar olib tashlandi');
+}
+
+// Kabinet UI
+function updateCabinetUI() {
+  if (!user) return;
+  const initials = (user.name[0] + user.surname[0]).toUpperCase();
+  document.getElementById('cabinet-avatar').textContent = initials;
+  document.getElementById('cabinet-name').textContent = user.name + ' ' + user.surname;
+  document.getElementById('cabinet-phone').textContent = user.phone;
+  document.getElementById('cabinet-coins').textContent =
+    (user.coins || 0).toLocaleString();
+}
+
+// Sahifa o'zgarganda
+const originalShowPage = showPage;
+window.showPage = function(page) {
+  originalShowPage(page);
+  if (page === 'cart') renderCart();
+  if (page === 'cabinet') updateCabinetUI();
+};
+
+// Ilovani ishga tushirish
+window.onload = function() {
+  const saved = localStorage.getItem('lm_user');
+  if (saved) {
+    user = JSON.parse(saved);
+    initHome();
+    showPage('home');
+  } else {
+    showPage('register');
+  }
+};

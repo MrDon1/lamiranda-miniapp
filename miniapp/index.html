@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>La Miranda</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ro'yxatdan o'tish sahifasi -->
+  <div id="page-register" class="page">
+    <div class="register-wrap">
+      <div class="logo-text">La Miranda</div>
+      <p class="register-sub">Davom etish uchun ro'yxatdan o'ting</p>
+
+      <div class="inp-group">
+        <label>Ism</label>
+        <input type="text" id="reg-name" placeholder="Ismingiz">
+      </div>
+      <div class="inp-group">
+        <label>Familiya</label>
+        <input type="text" id="reg-surname" placeholder="Familiyangiz">
+      </div>
+      <div class="inp-group">
+        <label>Telefon raqam</label>
+        <input type="tel" id="reg-phone" placeholder="+998 90 123 45 67">
+      </div>
+      <div class="inp-group">
+        <label>Manzil</label>
+        <input type="text" id="reg-address" placeholder="Shahar, tuman">
+      </div>
+
+      <button class="btn-primary" onclick="register()">Ro'yxatdan o'tish →</button>
+    </div>
+  </div>
+
+  <!-- Bosh sahifa -->
+  <div id="page-home" class="page" style="display:none">
+    <div class="header">
+      <span class="logo-text">La Miranda</span>
+      <div class="header-icons">
+        <button class="icon-btn" onclick="showPage('cart')">🛒 <span id="cart-count">0</span></button>
+      </div>
+    </div>
+
+    <div class="banner">
+      <div class="banner-title">Yangi kolleksiya</div>
+      <div class="banner-sub">Bahor desertlari mavjud</div>
+      <div class="banner-badge">Ko'rish →</div>
+    </div>
+
+    <div class="categories" id="categories"></div>
+
+    <div class="section-title">Mahsulotlar</div>
+    <div class="products" id="products">
+      <div class="loading">Yuklanmoqda...</div>
+    </div>
+
+    <div class="bottom-nav">
+      <button onclick="showPage('home')" class="nav-btn active">🏠<span>Bosh</span></button>
+      <button onclick="showPage('cart')" class="nav-btn">🛒<span>Savat</span></button>
+      <button onclick="showPage('cabinet')" class="nav-btn">👤<span>Kabinet</span></button>
+    </div>
+  </div>
+
+  <!-- Savat sahifasi -->
+  <div id="page-cart" class="page" style="display:none">
+    <div class="header">
+      <button class="back-btn" onclick="showPage('home')">← Orqaga</button>
+      <span class="logo-text">Savat</span>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-footer">
+      <div class="coins-row">
+        <span>🪙 <span id="coins-balance">0</span> tanga</span>
+        <button class="coins-btn" onclick="useCoins()">Tangadan foydalanish</button>
+      </div>
+      <div class="total-row">
+        <span>Jami:</span>
+        <span id="cart-total">0 so'm</span>
+      </div>
+      <button class="btn-primary" onclick="showPage('checkout')">Buyurtma berish →</button>
+    </div>
+    <div class="bottom-nav">
+      <button onclick="showPage('home')" class="nav-btn">🏠<span>Bosh</span></button>
+      <button onclick="showPage('cart')" class="nav-btn active">🛒<span>Savat</span></button>
+      <button onclick="showPage('cabinet')" class="nav-btn">👤<span>Kabinet</span></button>
+    </div>
+  </div>
+
+  <!-- Kabinet sahifasi -->
+  <div id="page-cabinet" class="page" style="display:none">
+    <div class="header">
+      <span class="logo-text">Kabinet</span>
+    </div>
+    <div class="cabinet-wrap">
+      <div class="avatar" id="cabinet-avatar">MN</div>
+      <div class="cabinet-name" id="cabinet-name">Maxmud Nurullayev</div>
+      <div class="cabinet-phone" id="cabinet-phone">+998 94 123 45 78</div>
+
+      <div class="coins-card">
+        <div class="coins-title">🪙 Tangalarim</div>
+        <div class="coins-value" id="cabinet-coins">0</div>
+        <div class="coins-hint">Keyingi buyurtmada ishlatish mumkin</div>
+      </div>
+
+      <div class="section-title">Buyurtmalar tarixi</div>
+      <div id="cabinet-orders">
+        <p class="empty-text">Hali buyurtma yo'q</p>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button onclick="showPage('home')" class="nav-btn">🏠<span>Bosh</span></button>
+      <button onclick="showPage('cart')" class="nav-btn">🛒<span>Savat</span></button>
+      <button onclick="showPage('cabinet')" class="nav-btn active">👤<span>Kabinet</span></button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
