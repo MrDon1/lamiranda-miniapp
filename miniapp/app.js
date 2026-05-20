@@ -121,18 +121,21 @@ function renderProducts(products) {
   container.innerHTML = '';
   products.forEach(p => {
     const inStock = p.stock_status === 'instock';
-    const img = p.images[0]?.thumbnail || p.images[0]?.src || '';
+    const img = p.images?.[0]?.src || '';
     const div = document.createElement('div');
     div.className = 'product-card';
     div.innerHTML = `
-      <div class="product-img">
-        ${img ? `<img src="${img}" alt="${p.name}">` : '🎂'}
+      <div class="product-img" style="position:relative; overflow:hidden;">
+        ${img
+          ? `<img src="${img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">`
+          : `<span style="font-size:40px;">🎂</span>`
+        }
       </div>
       <div class="product-body">
         <div class="product-name">${p.name}</div>
         <div class="product-price">${Number(p.price).toLocaleString()} so'm</div>
         <button class="product-btn" ${!inStock ? 'disabled style="opacity:0.5"' : ''}
-          onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${img}')">
+          onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${img}')">
           ${inStock ? 'Savatga +' : 'Tugagan'}
         </button>
       </div>
@@ -140,7 +143,6 @@ function renderProducts(products) {
     container.appendChild(div);
   });
 }
-
 // Savatga qo'shish
 function addToCart(id, name, price, img) {
   const existing = cart.find(i => i.id === id);
