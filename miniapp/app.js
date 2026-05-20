@@ -4,7 +4,7 @@ tg.ready();
 tg.expand();
 
 // API sozlamalari
-const API_URL = "https://lamiranda.uz/wp-json/wc/v3";
+const API_URL = "https://lamiranda-miniapp.vercel.app/api/proxy?path=";
 const USERNAME = "lamiranda_admin";
 const APP_PASSWORD = "QvII 4pmm xl8s puLi JknE amyC";
 
@@ -98,11 +98,11 @@ async function loadCategories() {
 // Mahsulotlarni yuklash
 async function loadProducts() {
   try {
-    const res = await fetch(`${API_URL}/products?per_page=50&status=publish`, {
-      headers: {
-        'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
-      }
-    });
+    const res = await fetch(`${API_URL}products&query=per_page=50%26status=publish`, {
+  headers: {
+    'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
+  }
+});
     allProducts = await res.json();
     renderProducts(allProducts);
   } catch (e) {
@@ -121,21 +121,18 @@ function renderProducts(products) {
   container.innerHTML = '';
   products.forEach(p => {
     const inStock = p.stock_status === 'instock';
-    const img = p.images?.[0]?.src || '';
+    const img = p.images[0]?.thumbnail || p.images[0]?.src || '';
     const div = document.createElement('div');
     div.className = 'product-card';
     div.innerHTML = `
-      <div class="product-img" style="position:relative; overflow:hidden;">
-        ${img
-          ? `<img src="${img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">`
-          : `<span style="font-size:40px;">🎂</span>`
-        }
+      <div class="product-img">
+        ${img ? `<img src="${img}" alt="${p.name}">` : '🎂'}
       </div>
       <div class="product-body">
         <div class="product-name">${p.name}</div>
         <div class="product-price">${Number(p.price).toLocaleString()} so'm</div>
         <button class="product-btn" ${!inStock ? 'disabled style="opacity:0.5"' : ''}
-          onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${img}')">
+          onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${img}')">
           ${inStock ? 'Savatga +' : 'Tugagan'}
         </button>
       </div>
@@ -143,6 +140,7 @@ function renderProducts(products) {
     container.appendChild(div);
   });
 }
+
 // Savatga qo'shish
 function addToCart(id, name, price, img) {
   const existing = cart.find(i => i.id === id);
