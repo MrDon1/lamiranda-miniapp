@@ -4,7 +4,7 @@ tg.ready();
 tg.expand();
 
 // API sozlamalari
-const API_URL = "https://lamiranda-miniapp.vercel.app/api/proxy?path=";
+const API_URL = "https://lamiranda.uz/wp-json/wc/v3";
 const USERNAME = "lamiranda_admin";
 const APP_PASSWORD = "QvII 4pmm xl8s puLi JknE amyC";
 
@@ -98,11 +98,11 @@ async function loadCategories() {
 // Mahsulotlarni yuklash
 async function loadProducts() {
   try {
-    const res = await fetch(`${API_URL}products&query=per_page=50%26status=publish`, {
-  headers: {
-    'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
-  }
-});
+    const res = await fetch(`${API_URL}/products?per_page=50&status=publish`, {
+      headers: {
+        'Authorization': 'Basic ' + btoa(USERNAME + ':' + APP_PASSWORD)
+      }
+    });
     allProducts = await res.json();
     renderProducts(allProducts);
   } catch (e) {
