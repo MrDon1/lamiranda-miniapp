@@ -65,7 +65,8 @@ async function loadCategories() {
     const container = document.getElementById('categories');
     container.innerHTML = '';
 
-    // "Hammasi" tugmasi
+    const allowedIds = ['Основные торты', 'Бенто торты', 'Бенто-торты', 'Пирожные', 'Продукции в таре', 'Выпечки'];
+
     const allBtn = document.createElement('button');
     allBtn.className = 'category-btn active';
     allBtn.textContent = 'Hammasi';
@@ -77,9 +78,12 @@ async function loadCategories() {
     container.appendChild(allBtn);
 
     cats.forEach(cat => {
+      const cleanName = cat.name.replace(/^\[?\d+\]?\s*/, '').replace(/🎂\s*/, '').trim();
+      if (!allowedIds.includes(cleanName)) return;
+
       const btn = document.createElement('button');
       btn.className = 'category-btn';
-      btn.textContent = cat.name;
+      btn.textContent = cleanName;
       btn.onclick = () => {
         document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -104,6 +108,7 @@ async function loadProducts() {
       }
     });
     allProducts = await res.json();
+    console.log(allProducts[0]?.name, allProducts[0]?.images?.[0]?.src);
     renderProducts(allProducts);
   } catch (e) {
     document.getElementById('products').innerHTML = '<p class="empty-text">Mahsulotlar yuklanmadi</p>';
@@ -121,18 +126,18 @@ function renderProducts(products) {
   container.innerHTML = '';
   products.forEach(p => {
     const inStock = p.stock_status === 'instock';
-   const img = p.images?.[0]?.src || p.images?.[0]?.thumbnail || '';
+    const img = p.images?.[0]?.src || '';
     const div = document.createElement('div');
     div.className = 'product-card';
     div.innerHTML = `
-      <div class="product-img">
-        ${img ? `<img src="${img}" alt="${p.name}">` : '🎂'}
+      <div style="width:100%;height:120px;overflow:hidden;background:#fce8ee;border-radius:14px 14px 0 0;">
+        ${img ? `<img src="${img}" style="width:100%;height:120px;object-fit:cover;display:block;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px;">🎂</div>'}
       </div>
       <div class="product-body">
         <div class="product-name">${p.name}</div>
         <div class="product-price">${Number(p.price).toLocaleString()} so'm</div>
         <button class="product-btn" ${!inStock ? 'disabled style="opacity:0.5"' : ''}
-          onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${img}')">
+          onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${img}')">
           ${inStock ? 'Savatga +' : 'Tugagan'}
         </button>
       </div>
@@ -140,7 +145,6 @@ function renderProducts(products) {
     container.appendChild(div);
   });
 }
-
 // Savatga qo'shish
 function addToCart(id, name, price, img) {
   const existing = cart.find(i => i.id === id);
