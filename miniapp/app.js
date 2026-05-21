@@ -65,7 +65,23 @@ async function loadCategories() {
     const container = document.getElementById('categories');
     container.innerHTML = '';
 
-    const allowedIds = ['Основные торты', 'Бенто торты', 'Бенто-торты', 'Пирожные', 'Продукции в таре', 'Выпечки'];
+    const allowedNames = [
+  'Основные торты',
+  'Бенто торты', 
+  'Бенто-торты',
+  'Пирожные',
+  'Продукции в таре',
+  'Выпечки'
+];
+
+const order = [
+  'Основные торты',
+  'Бенто торты',
+  'Бенто-торты', 
+  'Пирожные',
+  'Продукции в таре',
+  'Выпечки'
+];
 
     const allBtn = document.createElement('button');
     allBtn.className = 'category-btn active';
@@ -77,23 +93,42 @@ async function loadCategories() {
     };
     container.appendChild(allBtn);
 
-    cats.forEach(cat => {
-      const cleanName = cat.name.replace(/^\[?\d+\]?\s*/, '').replace(/🎂\s*/, '').trim();
-      if (!allowedIds.includes(cleanName)) return;
+    // Faqat kerakli kategoriyalarni filter qilamiz
+const filtered = cats.filter(cat => {
+  const cleanName = cat.name.replace(/^\[?\d+\]?\s*/, '').replace(/🎂\s*/, '').trim();
+  return allowedNames.includes(cleanName);
+});
 
-      const btn = document.createElement('button');
-      btn.className = 'category-btn';
-      btn.textContent = cleanName;
-      btn.onclick = () => {
-        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const filtered = allProducts.filter(p =>
-          p.categories.some(c => c.id === cat.id)
-        );
-        renderProducts(filtered);
-      };
-      container.appendChild(btn);
-    });
+// Takroriylarni olib tashlaymiz
+const unique = [];
+const seenNames = new Set();
+filtered.forEach(cat => {
+  const cleanName = cat.name.replace(/^\[?\d+\]?\s*/, '').replace(/🎂\s*/, '').trim();
+  const displayName = cleanName === 'Бенто-торты' ? 'Бенто торты' : cleanName;
+  if (!seenNames.has(displayName)) {
+    seenNames.add(displayName);
+    unique.push({...cat, cleanName: displayName});
+  }
+});
+
+// Tartibda ko'rsatamiz
+const orderedNames = ['Основные торты', 'Бенто торты', 'Пирожные', 'Продукции в таре', 'Выпечки'];
+unique.sort((a, b) => orderedNames.indexOf(a.cleanName) - orderedNames.indexOf(b.cleanName));
+
+unique.forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'category-btn';
+  btn.textContent = cat.cleanName;
+  btn.onclick = () => {
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = allProducts.filter(p =>
+      p.categories.some(c => c.id === cat.id)
+    );
+    renderProducts(filtered);
+  };
+  container.appendChild(btn);
+});
   } catch (e) {
     console.log('Kategoriya xato:', e);
   }
