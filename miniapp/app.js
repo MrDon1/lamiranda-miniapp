@@ -121,7 +121,7 @@ function renderProducts(products) {
   container.innerHTML = '';
   products.forEach(p => {
     const inStock = p.stock_status === 'instock';
-    const img = p.images[0]?.thumbnail || p.images[0]?.src || '';
+   const img = p.images?.[0]?.src || p.images?.[0]?.thumbnail || '';
     const div = document.createElement('div');
     div.className = 'product-card';
     div.innerHTML = `
